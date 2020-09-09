@@ -63,6 +63,7 @@ $(document).ready(function() {
         $(characterArea).append(characterCard);
     };
 
+    // This function places all characters in their designated area
     var gameStart = function() {
         for (var key in characters) {
             displayCharacter(characters[key], "#character-selection");
@@ -81,16 +82,17 @@ $(document).ready(function() {
         for (var i = 0; i < enemiesArray.length; i++) {
             displayCharacter(enemiesArray[i], "#enemies-here")
         }
-    }
+    };
 
 
-
-    $(".character-card").on("click", function() {
+    // Click event to select player, place it in it's designated area and send the enemies to their area
+    $("#character-selection").on("click", ".character-card", function() {
 
         // Retrieving the name of the player
         var player = $(this).attr("data-name");
         console.log(player);
 
+        // If there's no player selected...
         if (!selectedCharacter) {
             // Assign the name of the character to the variable used for the selected character
             selectedCharacter = characters[player];
@@ -116,6 +118,21 @@ $(document).ready(function() {
         console.log(selectedCharacter);
 
     });
+
+    // Click event to select the opponent
+    $("#enemies-here").on("click",".character-card", function() {
+        // Save opponent's name y variable
+        var opponentName = $(this).attr("data-name");
+
+        // there's no opponent in it's area... 
+        if ($("#opponent-here").children().length === 0) {
+            opponent = characters[opponentName];
+            moveCharacter(opponent, "#opponent-here");
+
+            $(this).remove();
+        }
+
+    })
 
 
 
