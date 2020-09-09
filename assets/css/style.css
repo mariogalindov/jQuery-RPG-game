@@ -1,8 +1,15 @@
 body {
     background-image: url(../images/background.jpg);
+    background-repeat: no-repeat;
 }
 
 img {
     width: 250px;
     height: 150px;
+}
+
+.character-card{
+    display: inline-block;
+    background-color: white;
+    margin: 5px;
 }
