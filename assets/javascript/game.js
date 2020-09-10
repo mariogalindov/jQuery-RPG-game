@@ -9,8 +9,6 @@
 // if opponent's health <= 0 next opponent message to choose next enemy
 // 6. If there are no enemies left you win
 
-
-
 // Execute when DOM has fully loaded
 $(document).ready(function() {
 
@@ -19,7 +17,7 @@ $(document).ready(function() {
         "Qui-Gon Jinn": {
             name: "Qui-Gon Jinn",
             health: 130,
-            attack: 8,
+            attack: 12,
             imageUrl: "assets/images/qui-gon jinn.jpg",
             counterAttack: 15
         },
@@ -50,7 +48,7 @@ $(document).ready(function() {
     var selectedCharacter;
     var enemies = [];
     var opponent; 
-    var turnsCount = 1;
+    var turnCount = 1;
     var killCount = 0;
 
     // This function creates the character card, creating the div and appending all the info and then appending it to the designated area
@@ -68,12 +66,12 @@ $(document).ready(function() {
         for (var key in characters) {
             displayCharacter(characters[key], "#character-selection");
         }
-    }
+    };
 
     gameStart();
 
     // This function will trigger the previous function to pass the character to the designated area, player or enemy.
-    var moveCharacter = function(char, area) {
+    var updateCharacter = function(char, area) {
         $(area).empty();
         displayCharacter(char, area);
     };
@@ -83,6 +81,34 @@ $(document).ready(function() {
             displayCharacter(enemiesArray[i], "#enemies-here")
         }
     };
+
+    // This function will display all the messages every turn. 
+    var messages = function(messageToDisplay) {
+        // $("#status").empty();
+        var messageDiv = $("#status");
+        var msgText = $("<div>").text(messageToDisplay);
+        messageDiv.append(msgText);
+        
+    };
+
+    var clearMessage = function() {
+        messageDiv = $("#status");
+        messageDiv.text("");
+    };
+
+    var restart = function(message) {
+
+        // Create restart button that when clicked reloads the page
+        var restartBtn = $("<button>Restart</<button>").click(function() {
+            location.reload();
+        });
+
+        // Create div with status message
+        var gameState = $("<div>").text(message);
+
+        $("body").append(gameState);
+        $("body").append(restartBtn);
+    }
 
 
     // Click event to select player, place it in it's designated area and send the enemies to their area
@@ -108,7 +134,7 @@ $(document).ready(function() {
             $("#characters-section").hide();
             
             // Move our player to it's designated area
-            moveCharacter(selectedCharacter, "#character-here");
+            updateCharacter(selectedCharacter, "#character-here");
 
             // Move enemies to their area
             placeEnemies(enemies)
@@ -127,16 +153,81 @@ $(document).ready(function() {
         // there's no opponent in it's area... 
         if ($("#opponent-here").children().length === 0) {
             opponent = characters[opponentName];
-            moveCharacter(opponent, "#opponent-here");
+            updateCharacter(opponent, "#opponent-here");
 
             $(this).remove();
         }
 
     })
 
+    $("#attack-button").on("click", function() {
+
+        // If there's an opponent in place
+        if ($("#opponent-here").children().length !== 0) {
+
+            console.log("Attack!")
+            // Variable to store the attack power of each turn
+            var currentAttackPwr = selectedCharacter.attack * turnCount;
+
+            // Attack and counterAttack messages
+            var attackMsg = "You attacked " + opponent.name + " for " + currentAttackPwr + " damage.";
+            var counterAttack = opponent.name + "counter-attacked you for  " + opponent.counterAttack;
+            clearMessage();
+
+            // Health decrease for opponent
+            opponent.health -= currentAttackPwr;
+
+            if (opponent.health > 0) {
+                // Display attack and counter messages
+                messages(attackMsg);
+                messages(counterAttack);
+
+                // Health decrease for selected character
+                selectedCharacter.health -= opponent.counterAttack;
+
+                // Updates health for both characters
+                updateCharacter(opponent, "#opponent-here");
+                updateCharacter(selectedCharacter, "#character-here");
+
+                if (selectedCharacter.health < 0) {
+                    clearMessage();
+                    restart("You have been defeated... Press Restart to play again");
+                    $("#attack-button").off("click");
+                } 
+            } else {
+                // Clear opponent card from section so another one can be selected
+                $("#opponent-here").empty();
+
+                // Define defeating message in variable and display it
+                var defeatingMsg = "You have defeated " + opponent.name + " choose your next opponent";
+                messages(defeatingMsg);
+
+                // Increase kill count
+                killCount++;
+
+                console.log("Kill Count: " + killCount);
+                console.log("Enemies length: " + enemies.length);
+
+                if (killCount >= enemies.length) {
+                    clearMessage();
+                    $("#attack-button").off("click");
+                    restart("Victory! Press Restart if you wish to play again.")
+                }
 
 
+            }
+
+            // Increase turn count so it increases attack power
+            turnCount++;
+
+            console.log(selectedCharacter);
+
+        } else {
+            clearMessage();
+            messages("Select an opponent")
+        }
 
 
+    });
 
 });
